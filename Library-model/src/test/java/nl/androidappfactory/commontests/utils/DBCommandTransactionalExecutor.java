@@ -13,7 +13,7 @@ public class DBCommandTransactionalExecutor {
         this.em = em;
     }
 
-    public <T> T excecuteCommand(DBCommand<T> dbCommand) {
+    public <T> T executeCommand(DBCommand<T> dbCommand) {
 
         T returnValue = null;
         try {
