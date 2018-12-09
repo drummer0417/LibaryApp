@@ -28,6 +28,7 @@ public class CategoryRepository {
     }
 
     public void update(Category addedCategory) {
+
         em.merge(addedCategory);
     }
 
@@ -39,9 +40,9 @@ public class CategoryRepository {
 
         StringBuilder jpql = new StringBuilder();
         jpql.append("SELECT 1 FROM Category e WHERE e.name = :name");
-        if (category.getId() != null) {
-            jpql.append(" And e.id != :id");
-        }
+//        if (category.getId() != null) {
+//            jpql.append(" And e.id != :id");
+//        }
 
         Query query = em.createQuery(jpql.toString());
         query.setParameter("name", category.getName());
