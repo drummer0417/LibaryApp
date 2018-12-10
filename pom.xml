@@ -84,6 +84,17 @@
                 <version>1.2.3</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>nl.androidappfactory</groupId>
+                <artifactId>library-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.androidappfactory</groupId>
+                <artifactId>library-model</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -134,5 +145,6 @@
 
     <modules>
         <module>library-model</module>
+        <module>library-resource</module>
     </modules>
 </project>
