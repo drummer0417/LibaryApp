@@ -168,7 +168,7 @@ public class CategoryServicesUTest {
             categoryServices.add(new Category(name));
             fail("An error should have been thrown");
         } catch (FieldNotValidException e) {
-            assertThat(e.getField(), is(equalTo("name")));
+            assertThat(e.getFieldName(), is(equalTo("name")));
         }
     }
 
@@ -178,7 +178,7 @@ public class CategoryServicesUTest {
             categoryServices.update(new Category(name));
             fail("An error should have been thrown");
         } catch (FieldNotValidException e) {
-            assertThat(e.getField(), is(equalTo("name")));
+            assertThat(e.getFieldName(), is(equalTo("name")));
         }
     }
 }

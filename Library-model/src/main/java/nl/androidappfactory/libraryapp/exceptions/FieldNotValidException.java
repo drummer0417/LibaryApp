@@ -2,23 +2,21 @@ package nl.androidappfactory.libraryapp.exceptions;
 
 public class FieldNotValidException extends RuntimeException {
 
-    private final static long serialVersionUID = 8021209912641056082L;
+    private static final long serialVersionUID = 4525821332583716666L;
 
-    private String field;
+    private final String fieldName;
 
-    public FieldNotValidException(String field, String message) {
+    public FieldNotValidException(final String fieldName, final String message) {
         super(message);
-        this.field = field;
+        this.fieldName = fieldName;
+    }
+
+    public String getFieldName() {
+        return fieldName;
     }
 
     @Override
     public String toString() {
-        return "FieldNotValidException{" +
-                "field='" + field + '\'' +
-                '}';
-    }
-
-    public String getField() {
-        return field;
+        return "FieldNotValidException [fieldName=" + fieldName + "]";
     }
 }
