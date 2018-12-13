@@ -17,7 +17,7 @@ public class JsonTestUtils {
     }
 
     public static String readJsonFile(final String relativePath) {
-        final InputStream is = JsonTestUtils.class.getClassLoader().getResourceAsStream(BASE_JSON_DIR + relativePath);
+        final InputStream is = JsonTestUtils.class.getClassLoader().getResourceAsStream(relativePath);
         try (Scanner scanner = new Scanner(is)) {
             return scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
         }

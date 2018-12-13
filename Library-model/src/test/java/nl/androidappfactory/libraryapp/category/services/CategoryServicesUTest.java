@@ -147,7 +147,7 @@ public class CategoryServicesUTest {
 
         when(categoryRepository.findAll("name")).thenReturn(new ArrayList<Category>());
 
-        List<Category> categories = categoryServices.findAll("name");
+        List<Category> categories = categoryServices.findAll();
         assertThat(categories.isEmpty(), is(true));
     }
 
@@ -155,7 +155,7 @@ public class CategoryServicesUTest {
     public void findAll() {
 
         when(categoryRepository.findAll("name")).thenReturn(allCategories());
-        List<Category> categories = categoryServices.findAll("name");
+        List<Category> categories = categoryServices.findAll();
         assertThat(categories.size(), is(equalTo(4)));
     }
 

@@ -1,8 +1,5 @@
 package nl.androidappfactory.libraryapp.common.model;
 
-//import nl.androidappfactory.libraryapp.exceptions.FieldNotValidException;
-import nl.androidappfactory.libraryapp.common.model.OperationResult;
-import nl.androidappfactory.libraryapp.common.model.ResourceMessage;
 import nl.androidappfactory.libraryapp.exceptions.FieldNotValidException;
 
 public final class StandardsOperationResults {
@@ -17,7 +14,7 @@ public final class StandardsOperationResults {
 	}
 
 	public static OperationResult getOperationResultInvalidField(final ResourceMessage resourceMessage,
-		final FieldNotValidException ex) {
+																 final FieldNotValidException ex) {
 		return OperationResult.error(resourceMessage.getKeyOfInvalidField(ex.getFieldName()), ex.getMessage());
 	}
 
@@ -25,5 +22,4 @@ public final class StandardsOperationResults {
 		return OperationResult.error(resourceMessage.getKeyOfResourceNotFound(),
 				resourceMessage.getMessageOfResourceNotFound());
 	}
-
 }

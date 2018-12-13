@@ -32,5 +32,4 @@ public class ResourceMessage {
     public String getMessageOfResourceNotFound() {
         return String.format(MESSAGE_NOT_FOUND, resource);
     }
-
 }

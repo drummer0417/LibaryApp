@@ -1,10 +1,19 @@
 package nl.androidappfactory.libraryapp.common.model;
 
-public interface HttpCode {
+public enum HttpCode {
+    CREATED(201),
+    VALIDATION_ERROR(422),
+    OK(200),
+    NOT_FOUND(404);
 
-    public int CREATED = 201;
-    public int FOUTE_AANVRAAG = 400;
-    public int VALIDATION_ERROR = 422;
-    public int SERVER_ERROR = 500;
+    private int code;
+
+    private HttpCode(final int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
 
 }

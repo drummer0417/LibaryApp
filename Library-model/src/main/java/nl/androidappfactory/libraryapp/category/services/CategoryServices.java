@@ -12,5 +12,5 @@ public interface CategoryServices {
 
     public Category findById(Long l);
 
-    List<Category> findAll(String name);
+    List<Category> findAll();
 }
