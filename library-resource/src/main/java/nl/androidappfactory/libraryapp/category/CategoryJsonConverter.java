@@ -6,17 +6,19 @@ import com.google.gson.JsonObject;
 import nl.androidappfactory.libraryapp.common.json.JsonReader;
 import nl.androidappfactory.libraryapp.model.Category;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 
+@ApplicationScoped
 public class CategoryJsonConverter {
 
-    public Category convertFrom(String json){
+    public Category convertFrom(String json) {
 
-            JsonObject jsonObject = JsonReader.readAsJsonObject(json);
-            Category category = new Category();
+        JsonObject jsonObject = JsonReader.readAsJsonObject(json);
+        Category category = new Category();
 
-            category.setName(JsonReader.getStringOrNull(jsonObject, "name"));
-            return category;
+        category.setName(JsonReader.getStringOrNull(jsonObject, "name"));
+        return category;
     }
 
     public JsonElement convertToJsonElement(final Category category) {

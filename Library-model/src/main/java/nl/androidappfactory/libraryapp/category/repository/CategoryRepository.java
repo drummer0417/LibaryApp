@@ -2,12 +2,16 @@ package nl.androidappfactory.libraryapp.category.repository;
 
 import nl.androidappfactory.libraryapp.model.Category;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.List;
 
+@Stateless
 public class CategoryRepository {
 
+    @PersistenceContext
     private EntityManager em;
 
     public CategoryRepository() {
@@ -40,9 +44,9 @@ public class CategoryRepository {
 
         StringBuilder jpql = new StringBuilder();
         jpql.append("SELECT 1 FROM Category e WHERE e.name = :name");
-//        if (category.getId() != null) {
-//            jpql.append(" And e.id != :id");
-//        }
+        if (category.getId() != null) {
+            jpql.append(" And e.id != :id");
+        }
 
         Query query = em.createQuery(jpql.toString());
         query.setParameter("name", category.getName());

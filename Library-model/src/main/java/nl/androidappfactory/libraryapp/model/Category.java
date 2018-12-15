@@ -6,7 +6,7 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "category")
+@Table(name = "lib_category")
 public class Category implements Serializable {
 
     private static final long serialVersionUID = -8626486049888616981L;

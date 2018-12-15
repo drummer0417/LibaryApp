@@ -1,6 +1,8 @@
 package nl.androidappfactory.libraryapp.commontests.utils;
 
 
+import com.google.gson.JsonObject;
+import nl.androidappfactory.libraryapp.common.json.JsonReader;
 import org.json.JSONException;
 import org.junit.Ignore;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -29,5 +31,10 @@ public class JsonTestUtils {
         } catch (final JSONException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    public static Long getIdFromJson(final String json) {
+        final JsonObject jsonObject = JsonReader.readAsJsonObject(json);
+        return JsonReader.getLongOrNull(jsonObject, "id");
     }
 }

@@ -18,15 +18,25 @@ import org.slf4j.LoggerFactory;
 
 import static nl.androidappfactory.libraryapp.common.model.StandardsOperationResults.*;
 
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+@Path("/categories")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class CategoryResource {
 
     private static final ResourceMessage RESOURCE_MESSAGE = new ResourceMessage("category");
 
     private Logger logger = LoggerFactory.getLogger(getClass());
+
+    @Inject
     private CategoryServices categoryServices;
+
+    @Inject
     private CategoryJsonConverter categoryJsonConverter;
 
     public CategoryResource() {
@@ -38,6 +48,7 @@ public class CategoryResource {
         this.categoryServices = categoryServices;
     }
 
+    @POST
     public Response add(String body) {
 
         logger.debug("Adding new categoryJson: {}", body);
@@ -62,7 +73,9 @@ public class CategoryResource {
         return Response.status(httpCode.getCode()).entity(OperationResultJsonWriter.toJson(result)).build();
     }
 
-    public Response update(final Long id, final String body) {
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") final Long id, final String body) {
         logger.debug("Updating the category {} with body {}", id, body);
         final Category category = categoryJsonConverter.convertFrom(body);
         category.setId(id);
@@ -90,7 +103,9 @@ public class CategoryResource {
         return Response.status(httpCode.getCode()).entity(OperationResultJsonWriter.toJson(result)).build();
     }
 
-    public Response findById(final Long id) {
+    @GET
+    @Path("{id}")
+    public Response findById(@PathParam("id") final Long id) {
         logger.debug("Find category: {}", id);
         Response.ResponseBuilder responseBuilder;
         try {
@@ -107,6 +122,7 @@ public class CategoryResource {
         return responseBuilder.build();
     }
 
+    @GET
     public Response findAll() {
         logger.debug("Find all categories");
 

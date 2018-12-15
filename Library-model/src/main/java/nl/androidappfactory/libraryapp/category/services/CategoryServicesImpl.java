@@ -6,6 +6,8 @@ import nl.androidappfactory.libraryapp.category.repository.CategoryRepository;
 import nl.androidappfactory.libraryapp.exceptions.FieldNotValidException;
 import nl.androidappfactory.libraryapp.model.Category;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -13,9 +15,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+@Stateless
 public class CategoryServicesImpl implements CategoryServices {
 
+    @Inject
     Validator validator;
+
+    @Inject
     CategoryRepository categoryRepository;
 
     @Override
