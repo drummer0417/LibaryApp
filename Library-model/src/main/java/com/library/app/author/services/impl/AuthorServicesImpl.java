@@ -15,46 +15,42 @@ import com.library.app.common.utils.ValidationUtils;
 @Stateless
 public class AuthorServicesImpl implements AuthorServices {
 
-    @Inject
-    AuthorRepository authorRepository;
+	@Inject
+	AuthorRepository authorRepository;
 
-    @Inject
-    Validator validator;
+	@Inject
+	Validator validator;
 
-    @Override
-    public Author add(final Author author) {
+	@Override
+	public Author add(final Author author) {
+		ValidationUtils.validateEntityFields(validator, author);
 
-        ValidationUtils.validateEntityFields(validator, author);
+		return authorRepository.add(author);
+	}
 
-        return authorRepository.add(author);
-    }
+	@Override
+	public void update(final Author author) {
+		ValidationUtils.validateEntityFields(validator, author);
 
-    @Override
-    public void update(final Author author) {
+		if (!authorRepository.existsById(author.getId())) {
+			throw new AuthorNotFoundException();
+		}
 
-        ValidationUtils.validateEntityFields(validator, author);
+		authorRepository.update(author);
+	}
 
-        if (!authorRepository.existsById(author.getId())) {
-            throw new AuthorNotFoundException();
-        }
+	@Override
+	public Author findById(final Long id) throws AuthorNotFoundException {
+		final Author author = authorRepository.findById(id);
+		if (author == null) {
+			throw new AuthorNotFoundException();
+		}
+		return author;
+	}
 
-        authorRepository.update(author);
-    }
-
-    @Override
-    public Author findById(final Long id) throws AuthorNotFoundException {
-
-        final Author author = authorRepository.findById(id);
-        if (author == null) {
-            throw new AuthorNotFoundException();
-        }
-        return author;
-    }
-
-    @Override
-    public PaginatedData<Author> findByFilter(final AuthorFilter authorFilter) {
-
-        return authorRepository.findByFilter(authorFilter);
-    }
+	@Override
+	public PaginatedData<Author> findByFilter(final AuthorFilter authorFilter) {
+		return authorRepository.findByFilter(authorFilter);
+	}
 
 }

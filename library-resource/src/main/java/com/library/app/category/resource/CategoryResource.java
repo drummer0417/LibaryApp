@@ -4,6 +4,8 @@ import static com.library.app.common.model.StandardsOperationResults.*;
 
 import java.util.List;
 
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -20,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.library.app.category.exception.CategoryExistentException;
 import com.library.app.category.exception.CategoryNotFoundException;
 import com.library.app.category.model.Category;
@@ -31,11 +32,13 @@ import com.library.app.common.json.JsonWriter;
 import com.library.app.common.json.OperationResultJsonWriter;
 import com.library.app.common.model.HttpCode;
 import com.library.app.common.model.OperationResult;
+import com.library.app.common.model.PaginatedData;
 import com.library.app.common.model.ResourceMessage;
 
 @Path("/categories")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed({ "EMPLOYEE" })
 public class CategoryResource {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -122,6 +125,7 @@ public class CategoryResource {
 	}
 
 	@GET
+	@PermitAll
 	public Response findAll() {
 		logger.debug("Find all categories");
 
@@ -129,22 +133,11 @@ public class CategoryResource {
 
 		logger.debug("Found {} categories", categories.size());
 
-		final JsonElement jsonWithPagingAndEntries = getJsonElementWithPagingAndEntries(categories);
+		final JsonElement jsonWithPagingAndEntries = JsonUtils.getJsonElementWithPagingAndEntries(
+				new PaginatedData<Category>(categories.size(), categories), categoryJsonConverter);
 
 		return Response.status(HttpCode.OK.getCode()).entity(JsonWriter.writeToString(jsonWithPagingAndEntries))
 				.build();
-	}
-
-	private JsonElement getJsonElementWithPagingAndEntries(final List<Category> categories) {
-		final JsonObject jsonWithEntriesAndPaging = new JsonObject();
-
-		final JsonObject jsonPaging = new JsonObject();
-		jsonPaging.addProperty("totalRecords", categories.size());
-
-		jsonWithEntriesAndPaging.add("paging", jsonPaging);
-		jsonWithEntriesAndPaging.add("entries", categoryJsonConverter.convertToJsonElement(categories));
-
-		return jsonWithEntriesAndPaging;
 	}
 
 }

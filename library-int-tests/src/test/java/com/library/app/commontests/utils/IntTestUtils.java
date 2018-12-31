@@ -8,6 +8,9 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Ignore;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.library.app.common.json.JsonReader;
 import com.library.app.common.model.HttpCode;
 
 @Ignore
@@ -31,6 +34,19 @@ public class IntTestUtils {
 		final Long id = JsonTestUtils.getIdFromJson(response.readEntity(String.class));
 		assertThat(id, is(notNullValue()));
 		return id;
+	}
+
+	public static JsonArray assertJsonHasTheNumberOfElementsAndReturnTheEntries(final Response response,
+			final int expectedTotalRecords, final int expectedEntriesForThisPage) {
+		final JsonObject result = JsonReader.readAsJsonObject(response.readEntity(String.class));
+
+		final int totalRecords = result.getAsJsonObject("paging").get("totalRecords").getAsInt();
+		assertThat(totalRecords, is(equalTo(expectedTotalRecords)));
+
+		final JsonArray entries = result.getAsJsonArray("entries");
+		assertThat(entries.size(), is(equalTo(expectedEntriesForThisPage)));
+
+		return entries;
 	}
 
 }
