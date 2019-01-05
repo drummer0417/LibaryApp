@@ -23,4 +23,10 @@ public final class StandardsOperationResults {
 				resourceMessage.getMessageOfResourceNotFound());
 	}
 
+	public static OperationResult getOperationResultDependencyNotFound(final ResourceMessage resourceMessage,
+			final String dependencyField) {
+		return OperationResult.error(resourceMessage.getKeyOfInvalidField(dependencyField),
+				resourceMessage.getMessageNotFound());
+	}
+
 }

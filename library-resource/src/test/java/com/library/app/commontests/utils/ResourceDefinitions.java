@@ -6,7 +6,8 @@ import org.junit.Ignore;
 public enum ResourceDefinitions {
 	CATEGORY("categories"),
 	AUTHOR("authors"),
-	USER("users");
+	USER("users"),
+	BOOK("books");
 
 	private String resourceName;
 

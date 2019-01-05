@@ -1,0 +1,10 @@
+{
+  "title": "Slecht book",
+  "description": "Even bad code can function. But if code isn't clean, ...",
+  "categoryId": 8,
+  "authorsIds": [
+    3,
+    2
+  ],
+  "price": 35.06
+}

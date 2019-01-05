@@ -23,6 +23,12 @@ public class IntTestUtils {
 		return assertResponseIsCreatedAndGetId(response);
 	}
 
+	public static Long addElementWithContentAndGetId(final ResourceClient resourceClient, final String pathResource,
+			final String content) {
+		final Response response = resourceClient.resourcePath(pathResource).postWithContent(content);
+		return assertResponseIsCreatedAndGetId(response);
+	}
+
 	public static String findById(final ResourceClient resourceClient, final String pathResource, final Long id) {
 		final Response response = resourceClient.resourcePath(pathResource + "/" + id).get();
 		assertThat(response.getStatus(), is(equalTo(HttpCode.OK.getCode())));
