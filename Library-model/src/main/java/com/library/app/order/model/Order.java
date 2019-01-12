@@ -1,190 +1,208 @@
 package com.library.app.order.model;
 
-import com.library.app.book.model.Book;
-import com.library.app.user.model.Customer;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import com.library.app.book.model.Book;
+import com.library.app.user.model.Customer;
+
 @Entity
 @Table(name = "lib_order")
 public class Order implements Serializable {
+	private static final long serialVersionUID = -8589662328013809186L;
 
-    private static final long serialVersionUID = -8989259839221155209L;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "created_at", updatable = false)
+	private Date createdAt;
 
-    @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at", updatable = false)
-    private Date createdAt;
+	@ManyToOne
+	@JoinColumn(name = "customer_id")
+	@NotNull
+	private Customer customer;
 
+	@ElementCollection(fetch = FetchType.LAZY)
+	@CollectionTable(name = "lib_order_item", joinColumns = @JoinColumn(name = "order_id"))
+	@NotNull
+	@Size(min = 1)
+	@Valid
+	private Set<OrderItem> items;
 
-    @NotNull
-    @ManyToMany
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+	@NotNull
+	private Double total;
 
-    @NotNull
-    private Double total;
+	public enum OrderStatus {
+		RESERVED,
+		RESERVATION_EXPIRED,
+		DELIVERED,
+		CANCELLED
+	}
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(name = "current_status")
-    private OrderStatus currentStatus;
+	@ElementCollection(fetch = FetchType.LAZY)
+	@CollectionTable(name = "lib_order_history", joinColumns = @JoinColumn(name = "order_id"))
+	@NotNull
+	@Size(min = 1)
+	@Valid
+	private Set<OrderHistoryEntry> historyEntries;
 
+	@Column(name = "current_status")
+	@Enumerated(EnumType.STRING)
+	@NotNull
+	private OrderStatus currentStatus;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "lib_order_item", joinColumns = @JoinColumn(name = "order_id"))
-    @NotNull
-    @Size(min = 1)
-    private Set<OrderItem> items;
+	public Order() {
+		this.createdAt = new Date();
+	}
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "lib_order_history", joinColumns = @JoinColumn(name = "order_id"))
-    @NotNull
-    private Set<OrederHistoryEntry> orderHistoryEntry;
+	public Long getId() {
+		return id;
+	}
 
-    public Order() {
+	public void setId(final Long id) {
+		this.id = id;
+	}
 
-        this.createdAt = new Date();
-    }
+	public Date getCreatedAt() {
+		return createdAt;
+	}
 
-    public boolean add(Book book, Integer quantity) {
+	public void setCreatedAt(final Date createdAt) {
+		this.createdAt = createdAt;
+	}
 
-        OrderItem orderItem = new OrderItem(book, quantity);
-        return getItems().add(orderItem);
-    }
+	public Customer getCustomer() {
+		return customer;
+	}
 
-    public void calculateTotal() {
+	public void setCustomer(final Customer customer) {
+		this.customer = customer;
+	}
 
-        this.total = 0D;
-        for (OrderItem item : items) {
-            item.calculatePrice();
-            total += item.getPrice();
-        }
-    }
+	public Set<OrderItem> getItems() {
+		if (items == null) {
+			items = new HashSet<>();
+		}
+		return items;
+	}
 
-    public Long getId() {
+	public void setItems(final Set<OrderItem> items) {
+		this.items = items;
+	}
 
-        return id;
-    }
+	public boolean addItem(final Book book, final Integer quantity) {
+		final OrderItem item = new OrderItem(book, quantity);
+		return getItems().add(item);
+	}
 
-    public void setId(Long id) {
+	public Double getTotal() {
+		return total;
+	}
 
-        this.id = id;
-    }
+	public void setTotal(final Double total) {
+		this.total = total;
+	}
 
-    @NotNull
-    public Date getCreatedAt() {
+	public void calculateTotal() {
+		this.total = 0D;
+		for (final OrderItem item : getItems()) {
+			item.calculatePrice();
+			this.total += item.getPrice();
+		}
+	}
 
-        return createdAt;
-    }
+	public Set<OrderHistoryEntry> getHistoryEntries() {
+		if (historyEntries == null) {
+			historyEntries = new HashSet<>();
+		}
+		return historyEntries;
+	}
 
-    public void setCreatedAt(@NotNull Date createdAt) {
+	public void setHistoryEntries(final Set<OrderHistoryEntry> historyEntries) {
+		this.historyEntries = historyEntries;
+	}
 
-        this.createdAt = createdAt;
-    }
+	public void addHistoryEntry(final OrderStatus status) {
+		if (this.currentStatus != null) {
+			if (this.currentStatus != OrderStatus.RESERVED) {
+				throw new IllegalArgumentException("An order in the state " + currentStatus
+						+ " cannot have its state changed");
+			}
+			if (this.currentStatus == status) {
+				throw new IllegalArgumentException("The new state must be different from the current one");
+			}
+		}
 
-    @NotNull
-    public Customer getCustomer() {
+		getHistoryEntries().add(new OrderHistoryEntry(status));
+		this.currentStatus = status;
+	}
 
-        return customer;
-    }
+	public OrderStatus getCurrentStatus() {
+		return currentStatus;
+	}
 
-    public void setCustomer(@NotNull Customer customer) {
+	public void setCurrentStatus(final OrderStatus currentStatus) {
+		this.currentStatus = currentStatus;
+	}
 
-        this.customer = customer;
-    }
+	public void setInitialStatus() {
+		getHistoryEntries().clear();
+		setCurrentStatus(null);
+		addHistoryEntry(OrderStatus.RESERVED);
+	}
 
-    @NotNull
-    public Double getTotal() {
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
 
-        return total;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final Order other = (Order) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
 
-    public void setTotal(@NotNull Double total) {
+	@Override
+	public String toString() {
+		return "Order [id=" + id + ", createdAt=" + createdAt + ", customer=" + customer + ", total=" + total
+				+ ", currentStatus=" + currentStatus + "]";
+	}
 
-        this.total = total;
-    }
-
-    @NotNull
-    public OrderStatus getCurrentStatus() {
-
-        return currentStatus;
-    }
-
-    public void setCurrentStatus(@NotNull OrderStatus currentStatus) {
-
-        this.currentStatus = currentStatus;
-    }
-
-    @NotNull
-    public Set<OrderItem> getItems() {
-
-        if (items == null) {
-            items = new HashSet<>();
-        }
-        return items;
-    }
-
-    public void setItems(@NotNull Set<OrderItem> items) {
-
-        this.items = items;
-    }
-
-    @NotNull
-    public Set<OrederHistoryEntry> getOrderHistoryEntry() {
-
-        if (orderHistoryEntry == null) {
-            orderHistoryEntry = new HashSet<>();
-        }
-        return orderHistoryEntry;
-    }
-
-    public void setOrderHistoryEntry(@NotNull Set<OrederHistoryEntry> orderHistoryEntry) {
-
-        this.orderHistoryEntry = orderHistoryEntry;
-    }
-
-    @Override
-    public String toString() {
-
-        return "Order{" +
-                "id=" + id +
-                ", createdAt=" + createdAt +
-                ", customer=" + customer +
-                ", total=" + total +
-                ", currentStatus=" + currentStatus +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Order order = (Order) o;
-
-        return id != null ? id.equals(order.id) : order.id == null;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return id != null ? id.hashCode() : 0;
-    }
-
-    public enum OrderStatus {
-        RESERVED, RESERVATION_EXPIRED, DELIVERED, CANCELLED;
-
-    }
 }

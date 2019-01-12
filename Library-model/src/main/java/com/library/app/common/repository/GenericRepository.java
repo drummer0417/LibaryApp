@@ -12,113 +12,101 @@ import com.library.app.common.model.filter.PaginationData;
 
 public abstract class GenericRepository<T> {
 
-    protected abstract Class<T> getPersistentClass();
+	protected abstract Class<T> getPersistentClass();
 
-    protected abstract EntityManager getEntityManager();
+	protected abstract EntityManager getEntityManager();
 
-    public T add(final T entity) {
+	public T add(final T entity) {
+		getEntityManager().persist(entity);
+		return entity;
+	}
 
-        getEntityManager().persist(entity);
-        return entity;
-    }
+	public T findById(final Long id) {
+		if (id == null) {
+			return null;
+		}
+		return getEntityManager().find(getPersistentClass(), id);
+	}
 
-    public T findById(final Long id) {
+	public void update(final T entity) {
+		getEntityManager().merge(entity);
+	}
 
-        if (id == null) {
-            return null;
-        }
-        return getEntityManager().find(getPersistentClass(), id);
-    }
+	@SuppressWarnings("unchecked")
+	public List<T> findAll(final String orderField) {
+		return getEntityManager().createQuery(
+				"Select e From " + getPersistentClass().getSimpleName() + " e Order by e." + orderField)
+				.getResultList();
+	}
 
-    public void update(final T entity) {
+	public boolean alreadyExists(final String propertyName, final String propertyValue, final Long id) {
+		final StringBuilder jpql = new StringBuilder();
+		jpql.append("Select 1 From " + getPersistentClass().getSimpleName() + " e where e." + propertyName
+				+ " = :propertyValue");
+		if (id != null) {
+			jpql.append(" and e.id != :id");
+		}
 
-        getEntityManager().merge(entity);
-    }
+		final Query query = getEntityManager().createQuery(jpql.toString());
+		query.setParameter("propertyValue", propertyValue);
+		if (id != null) {
+			query.setParameter("id", id);
+		}
 
-    @SuppressWarnings("unchecked")
-    public List<T> findAll(final String orderField) {
+		return query.setMaxResults(1).getResultList().size() > 0;
+	}
 
-        return getEntityManager().createQuery(
-                "Select e From " + getPersistentClass().getSimpleName() + " e Order by e." + orderField)
-                .getResultList();
-    }
+	public boolean existsById(final Long id) {
+		return getEntityManager()
+				.createQuery("Select 1 From " + getPersistentClass().getSimpleName() + " e where e.id = :id")
+				.setParameter("id", id)
+				.setMaxResults(1)
+				.getResultList().size() > 0;
+	}
 
-    public boolean alreadyExists(final String propertyName, final String propertyValue, final Long id) {
+	@SuppressWarnings("unchecked")
+	protected PaginatedData<T> findByParameters(final String clause, final PaginationData paginationData,
+			final Map<String, Object> queryParameters, final String defaultSortFieldWithDirection) {
+		final String clauseSort = "Order by e." + getSortField(paginationData, defaultSortFieldWithDirection);
+		final Query queryEntities = getEntityManager().createQuery(
+				"Select e From " + getPersistentClass().getSimpleName()
+						+ " e " + clause + " " + clauseSort);
+		applyQueryParametersOnQuery(queryParameters, queryEntities);
+		applyPaginationOnQuery(paginationData, queryEntities);
 
-        final StringBuilder jpql = new StringBuilder();
-        jpql.append("Select 1 From " + getPersistentClass().getSimpleName() + " e where e." + propertyName
-                + " = :propertyValue");
-        if (id != null) {
-            jpql.append(" and e.id != :id");
-        }
+		final List<T> entities = queryEntities.getResultList();
 
-        final Query query = getEntityManager().createQuery(jpql.toString());
-        query.setParameter("propertyValue", propertyValue);
-        if (id != null) {
-            query.setParameter("id", id);
-        }
+		return new PaginatedData<T>(countWithFilter(clause, queryParameters), entities);
+	}
 
-        return query.setMaxResults(1).getResultList().size() > 0;
-    }
+	private int countWithFilter(final String clause, final Map<String, Object> queryParameters) {
+		final Query queryCount = getEntityManager().createQuery(
+				"Select count(e) From " + getPersistentClass().getSimpleName() + " e " + clause);
+		applyQueryParametersOnQuery(queryParameters, queryCount);
+		return ((Long) queryCount.getSingleResult()).intValue();
+	}
 
-    public boolean existsById(final Long id) {
+	private void applyPaginationOnQuery(final PaginationData paginationData, final Query query) {
+		if (paginationData != null) {
+			query.setFirstResult(paginationData.getFirstResult());
+			query.setMaxResults(paginationData.getMaxResults());
+		}
+	}
 
-        return getEntityManager()
-                .createQuery("Select 1 From " + getPersistentClass().getSimpleName() + " e where e.id = :id")
-                .setParameter("id", id)
-                .setMaxResults(1)
-                .getResultList().size() > 0;
-    }
+	private String getSortField(final PaginationData paginationData, final String defaultSortField) {
+		if (paginationData == null || paginationData.getOrderField() == null) {
+			return defaultSortField;
+		}
+		return paginationData.getOrderField() + " " + getSortDirection(paginationData);
+	}
 
-    @SuppressWarnings("unchecked")
-    protected PaginatedData<T> findByParameters(final String clause, final PaginationData paginationData,
-                                                final Map<String, Object> queryParameters, final String defaultSortFieldWithDirection) {
+	private String getSortDirection(final PaginationData paginationData) {
+		return paginationData.isAscending() ? "ASC" : "DESC";
+	}
 
-        final String clauseSort = "Order by e." + getSortField(paginationData, defaultSortFieldWithDirection);
-        final Query queryEntities = getEntityManager().createQuery(
-                "Select e From " + getPersistentClass().getSimpleName()
-                        + " e " + clause + " " + clauseSort);
-        applyQueryParametersOnQuery(queryParameters, queryEntities);
-        applyPaginationOnQuery(paginationData, queryEntities);
-
-        final List<T> entities = queryEntities.getResultList();
-
-        return new PaginatedData<T>(countWithFilter(clause, queryParameters), entities);
-    }
-
-    private int countWithFilter(final String clause, final Map<String, Object> queryParameters) {
-
-        final Query queryCount = getEntityManager().createQuery(
-                "Select count(e) From " + getPersistentClass().getSimpleName() + " e " + clause);
-        applyQueryParametersOnQuery(queryParameters, queryCount);
-        return ((Long) queryCount.getSingleResult()).intValue();
-    }
-
-    private void applyPaginationOnQuery(final PaginationData paginationData, final Query query) {
-
-        if (paginationData != null) {
-            query.setFirstResult(paginationData.getFirstResult());
-            query.setMaxResults(paginationData.getMaxResults());
-        }
-    }
-
-    private String getSortField(final PaginationData paginationData, final String defaultSortField) {
-
-        if (paginationData == null || paginationData.getOrderField() == null) {
-            return defaultSortField;
-        }
-        return paginationData.getOrderField() + " " + getSortDirection(paginationData);
-    }
-
-    private String getSortDirection(final PaginationData paginationData) {
-
-        return paginationData.isAscending() ? "ASC" : "DESC";
-    }
-
-    private void applyQueryParametersOnQuery(final Map<String, Object> queryParameters, final Query query) {
-
-        for (final Entry<String, Object> entryMap : queryParameters.entrySet()) {
-            query.setParameter(entryMap.getKey(), entryMap.getValue());
-        }
-    }
+	private void applyQueryParametersOnQuery(final Map<String, Object> queryParameters, final Query query) {
+		for (final Entry<String, Object> entryMap : queryParameters.entrySet()) {
+			query.setParameter(entryMap.getKey(), entryMap.getValue());
+		}
+	}
 }

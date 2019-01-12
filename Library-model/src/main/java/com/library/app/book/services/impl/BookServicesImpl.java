@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.interceptor.Interceptors;
 import javax.validation.Validator;
 
 import com.library.app.author.model.Author;
@@ -18,8 +19,12 @@ import com.library.app.category.model.Category;
 import com.library.app.category.services.CategoryServices;
 import com.library.app.common.model.PaginatedData;
 import com.library.app.common.utils.ValidationUtils;
+import com.library.app.logaudit.interceptor.Auditable;
+import com.library.app.logaudit.interceptor.LogAuditInterceptor;
+import com.library.app.logaudit.model.LogAudit.Action;
 
 @Stateless
+@Interceptors(LogAuditInterceptor.class)
 public class BookServicesImpl implements BookServices {
 
 	@Inject
@@ -35,6 +40,7 @@ public class BookServicesImpl implements BookServices {
 	CategoryServices categoryServices;
 
 	@Override
+	@Auditable(action = Action.ADD)
 	public Book add(final Book book) {
 		ValidationUtils.validateEntityFields(validator, book);
 
@@ -45,6 +51,7 @@ public class BookServicesImpl implements BookServices {
 	}
 
 	@Override
+	@Auditable(action = Action.UPDATE)
 	public void update(final Book book) {
 		ValidationUtils.validateEntityFields(validator, book);
 

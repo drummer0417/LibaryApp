@@ -1,105 +1,95 @@
 package com.library.app.order.model;
 
-import com.library.app.book.model.Book;
+import java.io.Serializable;
 
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
+
+import com.library.app.book.model.Book;
 
 @Embeddable
 public class OrderItem implements Serializable {
+	private static final long serialVersionUID = 3520003746949600860L;
 
-    private static final long serialVersionUID = 3520003746949600860L;
+	@ManyToOne
+	@JoinColumn(name = "book_id")
+	@NotNull
+	private Book book;
 
-    @NotNull
-    @JoinColumn(name = "book_id")
-    @ManyToOne
-    private Book book;
+	@NotNull
+	private Integer quantity;
 
-    @NotNull
-    private Integer quantity;
+	@NotNull
+	private Double price;
 
-    @NotNull
-    private Double price;
+	public OrderItem() {
+	}
 
-    public OrderItem() {
+	public OrderItem(final Book book, final Integer quantity) {
+		this.book = book;
+		this.quantity = quantity;
+	}
 
-    }
+	public Book getBook() {
+		return book;
+	}
 
-    public OrderItem(@NotNull Book book, @NotNull Integer quantity) {
+	public void setBook(final Book book) {
+		this.book = book;
+	}
 
-        this.book = book;
-        this.quantity = quantity;
-    }
+	public Integer getQuantity() {
+		return quantity;
+	}
 
-    public void calculatePrice() {
+	public void setQuantity(final Integer quantity) {
+		this.quantity = quantity;
+	}
 
-        if (book != null && quantity != null) {
-            price = book.getPrice() * quantity;
-        }
-    }
+	public Double getPrice() {
+		return price;
+	}
 
-    @NotNull
-    public Book getBook() {
+	public void setPrice(final Double price) {
+		this.price = price;
+	}
 
-        return book;
-    }
+	public void calculatePrice() {
+		if (book != null && quantity != null) {
+			price = book.getPrice() * quantity;
+		}
+	}
 
-    public void setBook(@NotNull Book book) {
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((book == null) ? 0 : book.hashCode());
+		return result;
+	}
 
-        this.book = book;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final OrderItem other = (OrderItem) obj;
+		if (book == null) {
+			if (other.book != null)
+				return false;
+		} else if (!book.equals(other.book))
+			return false;
+		return true;
+	}
 
-    @NotNull
-    public Integer getQuantity() {
+	@Override
+	public String toString() {
+		return "OrderItem [book=" + book + ", quantity=" + quantity + ", price=" + price + "]";
+	}
 
-        return quantity;
-    }
-
-    public void setQuantity(@NotNull Integer quantity) {
-
-        this.quantity = quantity;
-    }
-
-    @NotNull
-    public Double getPrice() {
-
-        return price;
-    }
-
-    public void setPrice(@NotNull Double price) {
-
-        this.price = price;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        OrderItem orderItem = (OrderItem) o;
-
-        if (!book.equals(orderItem.book)) return false;
-        if (quantity != null ? !quantity.equals(orderItem.quantity) : orderItem.quantity != null) return false;
-        return price != null ? price.equals(orderItem.price) : orderItem.price == null;
-    }
-
-    @Override
-    public int hashCode() {
-
-        return book.hashCode();
-    }
-
-    @Override
-    public String toString() {
-
-        return "OrderItem{" +
-                "book=" + book +
-                ", quantity=" + quantity +
-                ", price=" + price +
-                '}';
-    }
 }
